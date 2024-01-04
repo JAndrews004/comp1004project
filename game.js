@@ -3,6 +3,9 @@ window.addEventListener('load', function () {
     const ctx = canvas.getContext('2d');
     canvas.width = 1500;
     canvas.height = 500;
+    var check = false;
+    var mousex = 0;
+    var mousey = 0;
 
     class Inputhandler {
 
@@ -17,7 +20,7 @@ window.addEventListener('load', function () {
             this.markedfordeletion = false;
 
         }
-        update() {
+        update(deltaTime) {
             this.x += this.speed;
             if (this.x + this.width > 1365) {
                 this.speed = 0;
@@ -45,6 +48,37 @@ window.addEventListener('load', function () {
 
         }
     }
+
+    class weaponbuton {
+        constructor(game, x, y) {
+            this.width = 75;
+            this.height = 75;
+            this.y = y;
+            this.x = x;
+            this.color = 'blue';
+            this.game = game;
+        }
+        draw(context) {
+        
+            context.fillStyle = this.color;
+            context.fillRect(this.x, this.y, this.width, this.height);
+            
+        }
+        checkcollision(mousex, mousey,place) {
+            if (mousex >= this.x && mousey >= this.y) {
+                console.log("first check done");
+                if (this.x + this.width >= mousex && this.y + this.height >= mousey) {
+                    console.log("clicked at place ");
+                    console.log(place);
+                    this.game.resetcolors();
+                    this.color = 'yellow';
+                }
+            }
+            
+
+
+        }
+    }
     class Layer {
 
     }
@@ -61,14 +95,16 @@ window.addEventListener('load', function () {
             this.width = width;
             this.height = height;
             this.enemies = [];
+            this.buttons = [new weaponbuton(this, 10, 10), new weaponbuton(this, 95, 10), new weaponbuton(this, 180, 10)];
             this.enemiesleft = 0;
             this.gameover = false;
             this.HP = 100;
+            
 
         }
         update(deltaTime) {
             this.enemies.forEach(enemy => {
-                enemy.update();
+                enemy.update(deltaTime);
             });
             this.enemies = this.enemies.filter(enemy => !enemy.markedfordeletion);
 
@@ -77,11 +113,40 @@ window.addEventListener('load', function () {
                     this.addEnemy();
                 }
             }
+            
+           
+            
+            window.addEventListener('click', function (e) {
+                check = true;
+                mousex = e.clientX -15;
+                mousey = e.clientY - canvas.getBoundingClientRect().top;
+                
+                
+            });
+            console.log(mousex);
+            if (check == true) {
+                console.log("clicked");
+                console.log("checking");
+                this.ccb(mousex,mousey);
+                check = false;
+            }
+            
+        }
+        ccb(mousex, mousey) {
+            var i = 0;
+            this.buttons.forEach(button => {
+                
+                button.checkcollision(mousex, mousey,i)
+                i+=1
+            });
         }
 
         draw(context) {
             this.enemies.forEach(enemy => {
                 enemy.draw(context);
+            });
+            this.buttons.forEach(button => {
+                button.draw(context)
             });
         }
         addEnemy() {
@@ -92,10 +157,20 @@ window.addEventListener('load', function () {
             if ((this.HP - damage) > 0) {
                 this.HP -= damage;
             }
-            else {
+            else if (this.HP <=0){
+                this.gameover = true;
+                console.log("GAME OVER");
                 //player dead end game
             }
         }
+        resetcolors() {
+            this.buttons.forEach(button => {
+
+                button.color = 'blue';
+            });
+        }
+        
+        
     }
 
 
@@ -113,5 +188,6 @@ window.addEventListener('load', function () {
     }
     animate();
 
+    
 
 });
