@@ -11,6 +11,25 @@ window.addEventListener('load', function () {
 
     }
 
+    class weapon_place {
+        constructor(game, x, y) {
+            this.width = 100;
+            this.height = 100;
+            this.y = y;
+            this.x = x;
+            this.color = 'black';
+            this.game = game;
+            this.empty = true;
+
+            
+        }
+        draw(context) {
+
+            context.fillStyle = this.color;
+            context.fillRect(this.x, this.y, this.width, this.height);
+
+        }
+    }
     class Enemy {
         constructor(game) {
             this.game = game;
@@ -35,6 +54,20 @@ window.addEventListener('load', function () {
             context.fillStyle = 'red';
             context.fillRect(this.x, this.y, this.width, this.height);
         }
+        checkcollision(mousex, mousey, place) {
+            if (mousex >= this.x && mousey >= this.y) {
+
+                if (this.x + this.width >= mousex && this.y + this.height >= mousey) {
+
+
+                    
+                    
+                }
+            }
+
+
+
+        }
 
     }
     class basiczombie extends Enemy {
@@ -50,13 +83,14 @@ window.addEventListener('load', function () {
     }
 
     class weaponbuton {
-        constructor(game, x, y) {
+        constructor(game, x, y,type) {
             this.width = 75;
             this.height = 75;
             this.y = y;
             this.x = x;
             this.color = 'blue';
             this.game = game;
+            this.type = type;
         }
         draw(context) {
         
@@ -66,12 +100,14 @@ window.addEventListener('load', function () {
         }
         checkcollision(mousex, mousey,place) {
             if (mousex >= this.x && mousey >= this.y) {
-                console.log("first check done");
+                
                 if (this.x + this.width >= mousex && this.y + this.height >= mousey) {
-                    console.log("clicked at place ");
-                    console.log(place);
+                    
+                    
                     this.game.resetcolors();
                     this.color = 'yellow';
+                    this.game.selected = true;
+                    this.game.selectedtype = this.type;
                 }
             }
             
@@ -82,7 +118,7 @@ window.addEventListener('load', function () {
     class Layer {
 
     }
-    class backgroung {
+    class background {
 
     }
 
@@ -95,10 +131,12 @@ window.addEventListener('load', function () {
             this.width = width;
             this.height = height;
             this.enemies = [];
-            this.buttons = [new weaponbuton(this, 10, 10), new weaponbuton(this, 95, 10), new weaponbuton(this, 180, 10)];
+            this.buttons = [new weaponbuton(this, 10, 10,'machinegun'), new weaponbuton(this, 95, 10,'mortar'), new weaponbuton(this, 180, 10,'sniper')];
             this.enemiesleft = 0;
             this.gameover = false;
             this.HP = 100;
+            this.selected = false;
+            this.selectedtype = '';
             
 
         }
@@ -113,20 +151,9 @@ window.addEventListener('load', function () {
                     this.addEnemy();
                 }
             }
-            
-           
-            
-            window.addEventListener('click', function (e) {
-                check = true;
-                mousex = e.clientX -15;
-                mousey = e.clientY - canvas.getBoundingClientRect().top;
-                
-                
-            });
-            console.log(mousex);
+
             if (check == true) {
-                console.log("clicked");
-                console.log("checking");
+               
                 this.ccb(mousex,mousey);
                 check = false;
             }
@@ -189,5 +216,13 @@ window.addEventListener('load', function () {
     animate();
 
     
+
+});
+window.addEventListener('click', function (e) {
+    const canvas = document.getElementById('canvas1');
+    check = true;
+    mousex = e.clientX - 15;
+    mousey = e.clientY - canvas.getBoundingClientRect().top;
+    console.log("click");
 
 });
