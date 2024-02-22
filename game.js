@@ -173,7 +173,7 @@ window.addEventListener('load', function () {
     class UI {
         constructor(game) {
             this.game = game;
-            this.fontsize = 25;
+            this.fontsize = 20;
             this.fontfamily = 'Helvetica';
             this.color = 'white';
 
@@ -185,14 +185,20 @@ window.addEventListener('load', function () {
             context.shadowOffsetX = 2;
             context.shadowOffsetY = 2;
             context.shadowColor = 'black';
+            ;
+            
+            context.drawImage(document.getElementById('heart'), 20, 440, 25, 25);
+            context.drawImage(document.getElementById('skull'), 20, 410, 25, 25);
+            context.drawImage(document.getElementById('coin'), 20, 470, 25, 25);
+            
             //health
-            context.fillText('HP: ' + this.game.HP, 20, 440);
+            context.fillText(this.game.HP, 50, 460);
             //wave
             context.fillText('WAVE ' + this.game.wavenumber, 700, 30);
             //kills
-            context.fillText('Kills: ' + this.game.kills, 20, 410);
+            context.fillText( this.game.kills, 50, 430);
             //reasources
-            context.fillText('Coins: ' + this.game.coins, 20, 470);
+            context.fillText(this.game.coins, 50, 490);
 
             context.restore();
         }
