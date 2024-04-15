@@ -1,0 +1,30 @@
+{
+  "Places": [
+    {
+      "pos": 1,
+      "name": "Jon",
+      "score": 2150
+    },
+    {
+      "pos": 2,
+      "name": "Bob",
+      "score": 2004
+
+    },
+    {
+      "pos": 3,
+      "name": "Jane",
+      "score": 1980
+    },
+    {
+      "pos": 4,
+      "name": "Chris",
+      "score": 1706
+    },
+    {
+      "pos": 5,
+      "name": "Billy",
+      "score": 1658
+    }
+  ]
+}
