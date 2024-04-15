@@ -1,4 +1,5 @@
 window.addEventListener('load', function () {
+    
     const canvas = document.getElementById('canvas1');
     const ctx = canvas.getContext('2d');
     canvas.width = 1500;
@@ -6,6 +7,7 @@ window.addEventListener('load', function () {
     var check = false;
     var mousex = 0;
     var mousey = 0;
+    keypressed = false;
     
    
     window.addEventListener('click', function (e) {
@@ -16,9 +18,13 @@ window.addEventListener('load', function () {
         console.log("click");
 
     });
-    class Inputhandler {
 
-    }
+    window.addEventListener('keydown', function (e) {
+        key = e.key;
+        keypressed = true;
+        
+    });
+    
 
     class weapon {
         constructor(game) {
@@ -36,6 +42,10 @@ window.addEventListener('load', function () {
             this.firerate = 50; //number of updates before next fireing
             this.texture = 'pink';
             this.cooldown = this.firerate;
+            this.image = document.getElementById('machinegun');
+            this.firiing = false;
+            this.cost = 100;
+            
         }
 
     }
@@ -45,22 +55,42 @@ window.addEventListener('load', function () {
             this.height = 100;
             this.y = y;
             this.x = x;
-            this.color = 'black';
             this.game = game;
             this.empty = true;
             this.message = 'weaponplace';
-            
-           
+            this.frame = 0;
+            this.maxframe = 3;
+            this.timetonextframe = 10;
+            this.playanimation = false;
+            this.defualtimage = document.getElementById('Place');
             
 
             
         }
         draw(context) {
+            if (this.empty == true) {
+                context.drawImage(this.defualtimage,0,0,50,50,this.x,this.y, this.width, this.height);
+            }
 
-            context.fillStyle = this.color;
-            context.fillRect(this.x, this.y, this.width, this.height);
+            else if (this.playanimation) {
+                context.drawImage(this.type.image, this.frame * 44, 0, 44, 27, this.x, this.y, this.width, this.height);
+                if (this.frame < this.maxframe && this.timetonextframe == 0) {
+                    this.frame++;
+                    this.timetonextframe = 10;
+                }
+                else if (this.frame == this.maxframe && this.timetonextframe == 0) {
+                    this.frame = 0;
+                    this.timetonextframe = 10;
+                    this.playanimation = false;
+                }
+                else {
+                    this.timetonextframe -= 1;
+                }
+            }
+            else { context.drawImage(this.type.image, 0, 0, 44, 27, this.x, this.y, this.width, this.height); }
 
         }
+        
         checkcollision(mousex, mousey) {
             if (this.game.selected) {
                 if (mousex >= this.x && mousey >= this.y) {
@@ -70,9 +100,13 @@ window.addEventListener('load', function () {
                         
                         //console.log("clicked");
                         if (this.game.selectedtype == 'machinegun' && this.empty) {
-                            this.type = new machinegun(game);
-                            this.color = '#FF69B4';//pink
-                            this.empty = false;
+                            
+                            if (this.game.coins - 100 >= 0) {
+                                this.type = new machinegun(game);
+                                this.game.coins -= this.type.cost;
+                                this.empty = false;
+                            }
+                            
 
                         }
 
@@ -93,6 +127,7 @@ window.addEventListener('load', function () {
             this.markedfordeletion = false;
             this.targeted = false;
             this.distancetowall = this.limit - this.x;
+           
 
         }
         update(deltaTime) {
@@ -109,8 +144,19 @@ window.addEventListener('load', function () {
 
         }
         draw(context) {
-            context.fillStyle = 'red';
-            context.fillRect(this.x, this.y, this.width, this.height);
+            context.drawImage(this.image, this.frame * 75, 0, 75, 75, this.x, this.y, this.width, this.height);
+            if (this.frame < this.maxframe && this.timetonextframe == 0) {
+                this.frame++;
+                this.timetonextframe = 10;
+            }
+            else if (this.frame == this.maxframe && this.timetonextframe == 0) {
+                this.frame = 0;
+                this.timetonextframe = 10;
+            }
+            else {
+                this.timetonextframe -= 1;
+            }
+            console.log(this.timetonextframe);
         }
         
 
@@ -120,17 +166,22 @@ window.addEventListener('load', function () {
             super(game);
             this.damage = 2;
             this.health = 100;
-            this.width = 50;
-            this.height = 70;
+            this.width = 75;
+            this.height = 75;
             this.y = Math.random() * (this.game.height * 0.8 - this.height) + (this.game.height * 0.1);
-            this.score = 10;
+            this.score = 5;
+            this.image = document.getElementById('basicZombie')
+            this.frame = 0;
+            this.maxframe = 3;
+
+            this.timetonextframe = 10;
 
         }
 
     }
 
     class weaponbuton {
-        constructor(game, x, y,type) {
+        constructor(game, x, y,type,image,image2) {
             this.width = 75;
             this.height = 75;
             this.y = y;
@@ -138,11 +189,18 @@ window.addEventListener('load', function () {
             this.color = 'blue';
             this.game = game;
             this.type = type;
+            this.image = image;
+            this.image2 = image2;
+            this.imagetodisplay = 1;
         }
         draw(context) {
-        
-            context.fillStyle = this.color;
-            context.fillRect(this.x, this.y, this.width, this.height);
+            if (this.imagetodisplay == 1) {
+                context.drawImage(this.image, this.x, this.y, this.width, this.height);
+            }
+            else if (this.imagetodisplay == 2) {
+                context.drawImage(this.image2, this.x, this.y, this.width, this.height);
+            }
+            
             
         }
         checkcollision(mousex, mousey,place) {
@@ -152,8 +210,8 @@ window.addEventListener('load', function () {
                 if (this.x + this.width >= mousex && this.y + this.height >= mousey) {
                     
                     
-                    this.game.resetcolors();
-                    this.color = 'yellow';
+                    this.game.resetimages();
+                    this.imagetodisplay = 2;
                     this.game.selected = true;
                     this.game.selectedtype = this.type;
                 }
@@ -210,7 +268,7 @@ window.addEventListener('load', function () {
             this.height = height;
             this.enemies = [];
             this.weaponplaces = [new weapon_place(this, 1380, 20), new weapon_place(this, 1380, 140), new weapon_place(this, 1380, 260), new weapon_place(this, 1380, 380)];
-            this.buttons = [new weaponbuton(this, 10, 10, 'machinegun'), new weaponbuton(this, 95, 10, 'mortar'), new weaponbuton(this, 180, 10, 'sniper')];
+            this.buttons = [new weaponbuton(this, 10, 10, 'machinegun', document.getElementById('button1'), document.getElementById('button1selec'))]; //, new weaponbuton(this, 95, 10, 'mortar'), new weaponbuton(this, 180, 10, 'sniper')
             this.enemiesleft = 0;
             this.gameover = false;
             this.HP = 100;
@@ -219,11 +277,15 @@ window.addEventListener('load', function () {
             this.message = 'game';
             this.notsorted = true;
             this.UI = new UI(this);
-            this.coins = 0;
-            this.kills = 0;
+            this.coins = 100;
+            this.kills = 10;
             this.wavenumber = 0;
             this.wavecountdown = 500;
             this.wavefinished = false;
+            this.entername = false;
+            this.playername = '';
+            this.nameentered = false;
+            this.updatedleaderboard = false;
             
 
         }
@@ -254,7 +316,7 @@ window.addEventListener('load', function () {
                     this.notsorted = true;
                 }
             }
-            
+           
             this.enemies.forEach(enemy => {
                 enemy.update(deltaTime);
             });
@@ -278,11 +340,13 @@ window.addEventListener('load', function () {
                     if (weapon.type.cooldown == 0) {
                         for (let i = 0; i < this.enemies.length; i++) {
                             if (this.enemies[i].targeted == false && this.enemies[i].distancetowall <= weapon.type.range) {
+
                                 this.enemies[i].targeted = true;
                                 this.enemies[i].markedfordeletion = true;
                                 this.enemiesleft -= 1;
-                                this.coins += this.enemies[i].score;
+                                this.coins += Math.round(this.enemies[i].score/(0.5*this.wavenumber));
                                 this.kills += 1;
+                                weapon.playanimation = true;
                                 weapon.type.cooldown = weapon.type.firerate;
                                 console.log("enemy killed");
 
@@ -318,7 +382,7 @@ window.addEventListener('load', function () {
         }
 
         draw(context) {
-
+            context.drawImage(document.getElementById('background'), 0, 0, 1500, 500);
             this.enemies.forEach(enemy => {
                 enemy.draw(context);
             });
@@ -338,16 +402,15 @@ window.addEventListener('load', function () {
             if ((this.HP - damage) >= 0) {
                 this.HP -= damage;
             }
-            if (this.HP <= 0) {
-                this.gameover = true;
-                console.log("GAME OVER");
-                //player dead end game
+            if ((this.HP - damage < 0)) {
+                this.HP = 0;
             }
+            
         }
-        resetcolors() {
+        resetimages() {
             this.buttons.forEach(button => {
 
-                button.color = 'blue';
+                button.imagetodisplay = 1;
             });
         }
         bblSort(arr) {
@@ -370,6 +433,164 @@ window.addEventListener('load', function () {
                 }
             }
         }
+        checkendgame(context) {
+            if (this.gameover == true) {
+                this.enemies = [];
+                this.weaponplaces = [];
+                this.buttons = []; //, new weaponbuton(this, 95, 10, 'mortar'), new weaponbuton(this, 180, 10, 'sniper')
+                this.enemiesleft = 0;
+                context.drawImage(document.getElementById('background'), 0, 0, 1500, 500);
+
+                context.save();
+                context.font = 75 + 'px ' + 'Helvetica';
+                context.fillStyle = 'red';
+                context.shadowOffsetX = 2;
+                context.shadowOffsetY = 2;
+                context.shadowColor = 'black';
+                context.fillText('GAME OVER!', 450, 60);
+                context.font = 25 + 'px ' + 'Helvetica';
+                context.fillText('The zombies destroyed the wall', 500, 100);
+
+                context.restore();
+                this.readDB(context);
+            }
+            
+
+        }
+        readDB(context) {
+            
+            fetch('leaderboard.json')
+                .then(response => response.json())
+                .then(data => {
+                    this.placements = data.Places; 
+                   
+                })
+                .catch(error => console.error('Error loading the JSON file:', error));
+            console.log(this.placements[4].score);
+            if (this.kills > this.placements[4].score) {
+                this.entername = true;
+                this.updatedleaderboard = false;
+            }
+            if (this.entername == true) {
+                this.enterName(context);
+            }
+            if (this.kills > this.placements[4].score && this.nameentered == true && this.entername == false) {
+                var place = 4;
+                for (let i = 4; i >= 0; i--) {
+                    if (this.placements[i].score < this.kills) {
+                        place = i;
+                    }
+                }
+                for (let i = 4; i > place; i--) {
+                    this.placements[i].name = this.placements[i - 1].name;
+                    this.placements[i].score = this.placements[i - 1].score;
+                }
+                this.placements[place].name = this.playername;
+                this.placements[place].score = this.kills;
+
+                this.updatedleaderboard = true;
+                console.log(this.placements);
+                this.kills = -1;
+                var newleaderboard = JSON.stringify(this.placements, null, 2);
+                // console.log(newleaderboard);
+                console.log(this.placements);
+                fetch('leaderboard.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        data.Places = newleaderboard;
+                        console.log(data.Places);
+
+
+                        const newData = JSON.stringify(data, null, 2);
+                        console.log(newData);
+                        fetch('leaderboard.json', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: newData,
+                        })
+                            .then(() => {
+                                console.log("database updated");
+                            })
+
+                    })
+                    .catch(error => console.error('Error loading the JSON file:', error));
+                
+                
+            
+            }
+
+            else if(this.updatedleaderboard == true){
+                context.save();
+                context.drawImage(document.getElementById('leaderboard'), 480, 110, 410, 320);
+                context.font = 25 + 'px ' + 'Helvetica';
+                context.fillStyle = 'white';
+                context.fillText('Place', 500, 150);
+                context.fillText('Name', 650, 150);
+                context.fillText('Score', 800, 150);
+
+                
+
+                for (let i = 1; i <= 5; i++) {
+                    context.fillText(this.placements[i - 1].pos, 520, 150 + i * 50);
+                    context.fillText(this.placements[i - 1].name, 650, 150 + i * 50);
+                    context.fillText(this.placements[i - 1].score, 800, 150 + i * 50);
+
+                }
+                context.restore()
+            }
+
+        }
+        enterName(context) {
+            context.save();
+            context.fillStyle = '#5F5F5F';
+            context.fillRect(480, 130, 375, 75);
+            context.fillStyle = '#333333'
+            context.fillRect(635, 135, 215, 65);
+            context.font = 50 + 'px ' + 'Helvetica';
+            context.fillStyle = 'white';
+            context.fillText('Name:', 485, 182);
+            context.fillText(this.playername, 640, 182);
+            context.font = 30 + 'px ' + 'Helvetica';
+            context.fillText('Please enter your name for the leaderboard', 400, 250);
+            context.fillText('Then press enter to confirm', 450, 300);
+            
+            if (keypressed == true) {
+                
+                
+                if (key== 'Enter') {
+                    this.entername = false;
+                    this.nameentered = true;
+                }
+                else if (key.charCodeAt(0) == 32) {
+                    this.playername = this.playername.concat(' ');
+                }
+                else if (key == 'Backspace' || key == 'Delete' ) {
+                    if (this.playername.length > 0) {
+                        this.playername = this.playername.substring(0, this.playername.length - 1);
+                    }
+                }
+                else if (this.playername.length == 0) {
+                    
+                    if (key.charCodeAt(0) >= 97 && key.charCodeAt(0) <= 122) {
+                        this.playername = this.playername.concat(key.toUpperCase());
+                        
+                    }
+                }
+                else {
+                    
+                    this.playername = this.playername.concat(key);
+                }
+                keypressed = false;
+            }
+            
+            
+            context.restore()
+        }
+        
+       
+            
     }
 
     const game = new Game(canvas.width, canvas.height);
@@ -379,6 +600,7 @@ window.addEventListener('load', function () {
         game.update();
         game.draw(ctx)
         requestAnimationFrame(animate);
+        game.checkendgame(ctx);
 
     }
     animate();
